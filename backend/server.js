@@ -14,6 +14,8 @@ const app = express(); // ✅ Initialize Express first
 // ✅ Use cookie-parser BEFORE routes
 app.use(cookieParser());  // 🔥 Fix for req.cookies being undefined
 
+
+
 // ✅ Fix CORS: Explicitly allow frontend domain
 app.use(cors({
     origin: "http://localhost:3000", // ✅ Matches frontend URL
@@ -25,8 +27,7 @@ app.use(cors({
 app.use(bodyParser.json()); // ✅ Ensures proper request body parsing before routes
 
 // ✅ MongoDB Connection
-mongoose.connect(process.env.MONGO_URI || "mongodb://localhost:27017/peetham_web", {
-    useNewUrlParser: true,
+mongoose.connect(process.env.MONGO_URI, {    useNewUrlParser: true,
     useUnifiedTopology: true
 }).then(() => console.log("✅ MongoDB Connected"))
   .catch(err => console.error("❌ MongoDB Connection Error:", err));
@@ -64,6 +65,16 @@ console.log("✅ Webhook route added at /webhook");
 
 // ✅ Default Route
 app.get("/", (req, res) => res.send("Backend is running!"));
+
+app.get('/test-db', async (req, res) => {
+    try {
+        const collections = await mongoose.connection.db.listCollections().toArray();
+        res.status(200).json({ success: true, collections });
+    } catch (error) {
+        console.error('❌ Database Query Error:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
 
 // ✅ Start Server
 const PORT = process.env.PORT || 5001;
